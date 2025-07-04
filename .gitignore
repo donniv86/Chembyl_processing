@@ -62,3 +62,9 @@ Thumbs.db
 *.pdb
 *.xyz
 *.zip
+
+# Analysis results
+eda_results/
+analysis_results/
+plots/
+reports/

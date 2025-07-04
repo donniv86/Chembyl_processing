@@ -275,7 +275,7 @@ class MolecularConverter:
             print(f"Error writing CSV file: {e}")
             return False
 
-    def convert(self, input_file, output_file, input_format=None, output_format=None):
+    def convert(self, input_file, output_file, input_format=None, output_format=None, csv_options=None):
         """Main conversion method."""
         # Auto-detect formats if not specified
         if input_format is None:
@@ -297,7 +297,9 @@ class MolecularConverter:
 
         # Read input file
         if input_format == 'csv':
-            success = self.read_csv(input_file)
+            if csv_options is None:
+                csv_options = {}
+            success = self.read_csv(input_file, **csv_options)
         elif input_format == 'sdf':
             success = self.read_sdf(input_file)
         elif input_format == 'mol':
@@ -366,21 +368,26 @@ Examples:
         print(f"Error: Input file '{args.input_file}' does not exist")
         sys.exit(1)
 
+    # Prepare CSV options
+    csv_options = {
+        'smiles_column': args.smiles_col,
+        'id_column': args.id_col,
+        'name_column': args.name_col,
+        'separator': args.separator,
+        'quotechar': args.quotechar
+    }
+    # Remove None values
+    csv_options = {k: v for k, v in csv_options.items() if v is not None}
+
     # Create converter and perform conversion
     converter = MolecularConverter()
-
-    # Set CSV options if needed
-    if args.input_format == 'csv' or (args.input_format is None and args.input_file.lower().endswith('.csv')):
-        converter.read_csv = lambda f: converter.read_csv(
-            f, smiles_column=args.smiles_col, id_column=args.id_col,
-            name_column=args.name_col, separator=args.separator, quotechar=args.quotechar
-        )
 
     success = converter.convert(
         args.input_file,
         args.output_file,
         args.input_format,
-        args.output_format
+        args.output_format,
+        csv_options=csv_options
     )
 
     if success:
